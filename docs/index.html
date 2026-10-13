@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071a38">
+  <meta name="description" content="硬核 3.26：在 Mac 本地识别英文、日文对白与画面字幕，翻译为中文并生成双语字幕成片。">
+  <title>硬核 3.26｜本地双语字幕工作台</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="nav-shell">
+    <nav class="nav" aria-label="主导航">
+      <a class="brand" href="#top" aria-label="硬核首页">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+        <span><strong>硬核</strong><small>双语字幕工作台</small></span>
+      </a>
+      <button class="menu" type="button" aria-expanded="false" aria-controls="nav-links">菜单</button>
+      <div class="nav-links" id="nav-links">
+        <a href="#features">功能</a>
+        <a href="#verification">性能验证</a>
+        <a href="#requirements">安装要求</a>
+        <a class="nav-cta" href="#download">下载软件</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero section">
+      <div class="hero-copy">
+        <div class="eyebrow"><span></span>硬核 3.26 · Mac 双语字幕工具</div>
+        <h1>把视频对白，变成<br><em>清楚可靠的双语成片</em></h1>
+        <p class="hero-lead">自动判断英文、日文、语音或画面字幕。画面已有英文时保留英文，只新增中文；没有字幕时生成中英双语。音乐、笑声、掌声与环境音不翻译。</p>
+        <div class="hero-actions">
+          <a class="button primary" href="downloads/Yinghe-3.26-local-beta-AppleSilicon.zip" download>下载硬核 3.26</a>
+          <a class="button secondary" href="#requirements">查看安装说明</a>
+        </div>
+        <div class="trust-row">
+          <span>✓ 本地识别</span><span>✓ 原声音保留</span><span>✓ 成片自动自检</span>
+        </div>
+      </div>
+      <div class="hero-visual" aria-label="硬核应用界面预览">
+        <div class="glow"></div>
+        <div class="window">
+          <div class="window-bar"><span></span><span></span><span></span><b>硬核 3.26</b></div>
+          <img src="assets/app-interface.jpg" alt="硬核 3.26 当前任务、成片预览与字幕校对界面">
+        </div>
+      </div>
+    </section>
+
+    <section class="facts" aria-label="产品特点">
+      <article><strong>全自动</strong><span>一键识别、翻译、生成成片</span></article>
+      <article><strong>本地优先</strong><span>识别在 Mac 上完成，保护素材隐私</span></article>
+      <article><strong>不乱翻</strong><span>只处理说话内容，跳过非语言声音</span></article>
+      <article><strong>不降帧</strong><span>导出后检查时长与实际帧率</span></article>
+    </section>
+
+    <section class="section" id="features">
+      <div class="section-heading">
+        <span>现在的硬核</span>
+        <h2>不是“给所有声音加字幕”<br>而是先理解视频，再决定怎么处理</h2>
+        <p>识别、翻译、字幕编排和视频导出在同一个工作台完成，减少反复切换工具。</p>
+      </div>
+      <div class="feature-grid">
+        <article class="feature-card accent">
+          <div class="icon">识</div><h3>自动识别内容</h3>
+          <p>自动区分英文、日文，以及语音或画面字幕。语种结果不可靠时停止自动翻译，避免生成错误字幕。</p>
+        </article>
+        <article class="feature-card">
+          <div class="icon">声</div><h3>只翻译说话</h3>
+          <p>音乐、笑声、掌声、关门声和环境声等非语言内容不翻译、不生成字幕，原视频声音保持不变。</p>
+        </article>
+        <article class="feature-card">
+          <div class="icon">字</div><h3>识别画面字幕</h3>
+          <p>逐段检查视频已有文字。画面已有英文字幕时不遮挡、不重复嵌入英文，只在合适位置补中文。</p>
+        </article>
+        <article class="feature-card">
+          <div class="icon">帧</div><h3>保留真实帧率</h3>
+          <p>针对高帧率和可变帧率素材选择合适导出方式，并对输出时长、目标帧时间和实际帧率进行自检。</p>
+        </article>
+        <article class="feature-card">
+          <div class="icon">校</div><h3>字幕可校对</h3>
+          <p>生成前可修改全文和起止时间；成片与双语 SRT 自动保存，方便继续剪辑或交付。</p>
+        </article>
+        <article class="feature-card">
+          <div class="icon">隐</div><h3>本地处理优先</h3>
+          <p>语音识别引擎随 App 提供；识别模型首次使用时下载到本机，日常素材无需上传到视频服务器。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section verification" id="verification">
+      <div class="verification-copy">
+        <div class="section-heading left">
+          <span>实测与自检</span>
+          <h2>“导出成功”还不够<br>成片必须能复核</h2>
+          <p>硬核会在导出后检查时长、时间轴与实际帧率。字幕规则另有回归检查，避免修复一个问题又带回旧问题。</p>
+        </div>
+        <div class="check-list">
+          <p><i>✓</i> 原视频和既有成片始终保留</p>
+          <p><i>✓</i> 高帧率素材不会静默降成 30fps 或 17fps</p>
+          <p><i>✓</i> 英文字幕段与无字幕语音段可在同一视频中分别处理</p>
+          <p><i>✓</i> 识别失败时停止，不用错误结果继续生成</p>
+        </div>
+      </div>
+      <div class="metrics-card">
+        <span class="metric-label">当前开发构建验证</span>
+        <div class="metric"><strong>60</strong><span>项字幕规则回归检查</span></div>
+        <div class="metric"><strong>30 → 30</strong><span>fps 实测源片与成片一致</span></div>
+        <div class="metric"><strong>0.01 秒</strong><span>一次 92.8 秒样片的时长差</span></div>
+        <small>以上为指定测试样片结果，不代表所有素材的固定速度或精度承诺。</small>
+      </div>
+    </section>
+
+    <section class="section requirements" id="requirements">
+      <div class="section-heading left">
+        <span>安装与使用</span>
+        <h2>下载、安装，开始制作字幕</h2>
+      </div>
+      <div class="requirements-grid">
+        <div class="steps">
+          <article><b>01</b><div><h3>下载并解压 ZIP</h3><p>此下载包没有开发者身份签名和苹果公证。解压后把包内的硬核 App 拖入“应用程序”。</p></div></article>
+          <article><b>02</b><div><h3>允许首次打开</h3><p>如果 macOS 阻止打开，请到“系统设置 → 隐私与安全”点击“仍要打开”，按系统提示确认。受管理的电脑可能不允许运行。</p></div></article>
+          <article><b>03</b><div><h3>首次准备识别模型</h3><p>首次识别可能需要下载约 1.5GB 的本地模型；之后可重复使用。</p></div></article>
+          <article><b>04</b><div><h3>选择视频，一键处理</h3><p>识别、翻译、成片和 SRT 会保存到输出文件夹。</p></div></article>
+        </div>
+        <aside class="system-card">
+          <span>系统要求</span>
+          <h3>Apple Silicon Mac</h3>
+          <ul>
+            <li>macOS 26.4 或更高版本</li>
+            <li>Intel 版尚未完成验证，暂不提供下载</li>
+            <li>首次下载模型需要网络</li>
+            <li>建议为长视频预留充足磁盘空间</li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <section class="download section" id="download">
+      <div>
+        <span class="pill">Mac 下载</span>
+        <h2>下载硬核 3.26</h2>
+        <p>适用于 Apple Silicon Mac，macOS 26.4 及以上。首次打开可能需要在“隐私与安全”中手动允许。此包未完成另一台 Mac 的完整验证，请保留原视频并复核成片。</p>
+      </div>
+      <div class="download-actions">
+        <a class="button light" href="downloads/Yinghe-3.26-local-beta-AppleSilicon.zip" download>下载 ZIP · 约 2.2MB</a>
+        <a class="release-link" href="downloads/install.txt">查看安装说明 →</a>
+      </div>
+    </section>
+
+    <section class="section faq">
+      <div class="section-heading left"><span>常见问题</span><h2>开始前需要知道</h2></div>
+      <details><summary>下载后提示无法验证开发者怎么办？</summary><p>此版本没有开发者身份签名和苹果公证。请先尝试打开，再到“系统设置 → 隐私与安全”点击“仍要打开”。无需关闭系统安全保护。Apple 芯片运行所需的本地临时签名已保留。</p></details>
+      <details><summary>别人下载后为什么还需要下载语言模型？</summary><p>App 内置识别引擎，但约 1.5GB 的识别模型不放在 ZIP 安装包中。首次使用时下载一次，之后保存在本机重复使用；中文翻译也可能需要下载系统语言资源。</p></details>
+      <details><summary>视频已经有英文字幕，会被遮住吗？</summary><p>当前规则不会使用黑色遮盖。系统会保留原画面中的英文字幕，并只新增中文；没有画面字幕的对白段则生成中英双语。</p></details>
+      <details><summary>音乐或环境声会不会被翻译？</summary><p>不会。只有检测为说话内容的片段才进入翻译；音乐、笑声、掌声和环境声不生成字幕。</p></details>
+      <details><summary>制作完成后需要校对吗？</summary><p>建议播放成片，检查字幕内容和声音是否一致。软件提供字幕校对功能，可修改文字和起止时间；请保留原视频。</p></details>
+    </section>
+  </main>
+
+  <footer>
+    <a class="brand footer-brand" href="#top"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span><strong>硬核</strong><small>双语字幕工作台</small></span></a>
+    <p>本地识别 · 隐私优先 · 结果可复核</p>
+    <p class="copyright">© <span id="year"></span> 硬核双语字幕工作台。</p>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>
