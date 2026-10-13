@@ -32,9 +32,9 @@
         <h1>把视频对白，变成<br><em>清楚可靠的双语成片</em></h1>
         <p class="hero-lead">自动判断英文、日文、语音或画面字幕。画面已有英文时保留英文，只新增中文；没有字幕时生成中英双语。音乐、笑声、掌声与环境音不翻译。</p>
         <div class="hero-actions">
-          <a class="button primary" href="downloads/Yinghe-3.26-local-beta-AppleSilicon.zip" download>下载硬核 3.26</a>
-          <a class="button secondary" href="#requirements">查看安装说明</a>
+          <button class="button primary" type="button" disabled aria-describedby="experience-status" style="font:inherit;cursor:not-allowed;opacity:.65">选择视频，一键翻译</button>
         </div>
+        <p id="experience-status">在线翻译暂未开放，视频处理服务接通后即可一键体验前两分钟。现在可在下方下载 App 使用。</p>
         <div class="trust-row">
           <span>✓ 本地识别</span><span>✓ 原声音保留</span><span>✓ 成片自动自检</span>
         </div>
@@ -118,11 +118,11 @@
         <h2>下载、安装，开始制作字幕</h2>
       </div>
       <div class="requirements-grid">
-        <div class="steps">
-          <article><b>01</b><div><h3>下载并解压 ZIP</h3><p>此下载包没有开发者身份签名和苹果公证。解压后把包内的硬核 App 拖入“应用程序”。</p></div></article>
-          <article><b>02</b><div><h3>允许首次打开</h3><p>如果 macOS 阻止打开，请到“系统设置 → 隐私与安全”点击“仍要打开”，按系统提示确认。受管理的电脑可能不允许运行。</p></div></article>
-          <article><b>03</b><div><h3>首次准备识别模型</h3><p>首次识别可能需要下载约 1.5GB 的本地模型；之后可重复使用。</p></div></article>
-          <article><b>04</b><div><h3>选择视频，一键处理</h3><p>识别、翻译、成片和 SRT 会保存到输出文件夹。</p></div></article>
+        <div class="system-card">
+          <h3>在 App 中一键完成</h3>
+          <p>选择视频后点击一键处理，软件自动识别、翻译并生成成片和 SRT，无需逐步点击。</p>
+          <p>解压下载包，把硬核 App 拖入“应用程序”。如果首次打开被阻止，到“系统设置 → 隐私与安全”选择“仍要打开”。</p>
+          <p>首次识别需要下载约 1.5GB 的模型。此包没有开发者身份签名和苹果公证。</p>
         </div>
         <aside class="system-card">
           <span>系统要求</span>
