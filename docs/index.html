@@ -32,9 +32,9 @@
         <h1>把视频对白，变成<br><em>清楚可靠的双语成片</em></h1>
         <p class="hero-lead">自动判断英文、日文、语音或画面字幕。画面已有英文时保留英文，只新增中文；没有字幕时生成中英双语。音乐、笑声、掌声与环境音不翻译。</p>
         <div class="hero-actions">
-          <button class="button primary" type="button" disabled aria-describedby="experience-status" style="font:inherit;cursor:not-allowed;opacity:.65">选择视频，一键翻译</button>
+          <a class="button primary" href="#download">下载并安装硬核</a>
         </div>
-        <p id="experience-status">在线翻译暂未开放，视频处理服务接通后即可一键体验前两分钟。现在可在下方下载 App 使用。</p>
+        <p id="experience-status">Mac 版本现已提供标准安装包，无需手动拖动。网页在线翻译尚未开放，请下载 App 在本机使用。</p>
         <div class="trust-row">
           <span>✓ 本地识别</span><span>✓ 原声音保留</span><span>✓ 成片自动自检</span>
         </div>
@@ -118,7 +118,7 @@
       </div>
       <div class="metrics-card">
         <span class="metric-label">当前开发构建验证</span>
-        <div class="metric"><strong>60</strong><span>项字幕规则回归检查</span></div>
+        <div class="metric"><strong>63</strong><span>项软件回归检查 · Build 327</span></div>
         <div class="metric"><strong>30 → 30</strong><span>fps 实测源片与成片一致</span></div>
         <div class="metric"><strong>0.01 秒</strong><span>一次 92.8 秒样片的时长差</span></div>
         <small>以上为指定测试样片结果，不代表所有素材的固定速度或精度承诺。</small>
@@ -134,15 +134,15 @@
         <div class="system-card">
           <h3>在 App 中一键完成</h3>
           <p>选择视频后点击一键处理，软件自动识别、翻译并生成成片和 SRT，无需逐步点击。</p>
-          <p>解压下载包，把硬核 App 拖入“应用程序”。如果首次打开被阻止，到“系统设置 → 隐私与安全”选择“仍要打开”。</p>
-          <p>首次识别需要下载约 1.5GB 的模型。此包没有开发者身份签名和苹果公证。</p>
+          <p>下载 PKG → 双击 → 按“继续、安装”操作。安装器会把 App 放入“应用程序”，无需复制或拖动；系统可能要求这台 Mac 的登录密码或触控 ID 授权。</p>
+          <p>首次识别需在 App 中点击“下载并启用”，下载约 1.5GB 的模型；系统翻译资源也可能需要下载。本包尚未完成 Developer ID 签名和苹果公证，macOS 仍可能阻止运行。</p>
         </div>
         <aside class="system-card">
           <span>系统要求</span>
           <h3>Apple Silicon Mac</h3>
           <ul>
             <li>macOS 26.4 或更高版本</li>
-            <li>Intel 版尚未完成验证，暂不提供下载</li>
+            <li>仅提供 M 系列芯片版本，不支持 Intel Mac</li>
             <li>首次下载模型需要网络</li>
             <li>建议为长视频预留充足磁盘空间</li>
           </ul>
@@ -154,18 +154,18 @@
       <div>
         <span class="pill">Mac 下载</span>
         <h2>下载硬核 3.26</h2>
-        <p>适用于 Apple Silicon Mac，macOS 26.4 及以上。首次打开可能需要在“隐私与安全”中手动允许。此包未完成另一台 Mac 的完整验证，请保留原视频并复核成片。</p>
+        <p>2026-10-20 更新 · 3.26 Build 327。Apple Silicon Mac，macOS 26.4 及以上。补齐应用图标、标准安装向导，并包含字幕延迟修复。</p><p style="margin-top:12px">已通过 63 项软件检查、44 项安装包检查；尚未完成另一台干净 Mac 的完整验证。本包未签名公证，系统仍可能阻止运行。请保留原视频并复核成片。</p>
       </div>
       <div class="download-actions">
-        <a class="button light" href="downloads/Yinghe-3.26-local-beta-AppleSilicon.zip" download>下载 ZIP · 约 2.2MB</a>
-        <a class="release-link" href="downloads/install.txt">查看安装说明 →</a>
+        <a class="button light" href="downloads/Yinghe-3.26-build327-AppleSilicon.pkg" download>下载 Mac 安装包 · 3.3MB</a>
+        <a class="release-link" href="downloads/install-build327.txt">查看安装说明与校验值 →</a><br><a class="release-link" href="https://github.com/541994282-dev/yinghe-beta/issues/new" target="_blank" rel="noopener">安装或使用遇到问题？反馈给我们 →</a>
       </div>
     </section>
 
     <section class="section faq">
       <div class="section-heading left"><span>常见问题</span><h2>开始前需要知道</h2></div>
-      <details><summary>下载后提示无法验证开发者怎么办？</summary><p>此版本没有开发者身份签名和苹果公证。请先尝试打开，再到“系统设置 → 隐私与安全”点击“仍要打开”。无需关闭系统安全保护。Apple 芯片运行所需的本地临时签名已保留。</p></details>
-      <details><summary>别人下载后为什么还需要下载语言模型？</summary><p>App 内置识别引擎，但约 1.5GB 的识别模型不放在 ZIP 安装包中。首次使用时下载一次，之后保存在本机重复使用；中文翻译也可能需要下载系统语言资源。</p></details>
+      <details><summary>下载后提示无法验证开发者怎么办？</summary><p>本包未签名公证。请核对本页来源与安装说明中的 SHA256，只在确认来源可信、文件未被修改时，按 <a href="https://support.apple.com/zh-cn/102445" target="_blank" rel="noopener">苹果官方说明</a>决定是否允许打开。安装器不会关闭或绕过系统保护；若不能或不愿手动确认，请暂不安装并反馈问题。</p></details>
+      <details><summary>别人下载后为什么还需要下载语言模型？</summary><p>App 内置识别引擎，但约 1.5GB 的识别模型不放在安装包中。首次使用时下载一次，之后保存在本机重复使用；中文翻译也可能需要下载系统语言资源。</p></details>
       <details><summary>视频已经有英文字幕，会被遮住吗？</summary><p>当前规则不会使用黑色遮盖。系统会保留原画面中的英文字幕，并只新增中文；没有画面字幕的对白段则生成中英双语。</p></details>
       <details><summary>音乐或环境声会不会被翻译？</summary><p>不会。只有检测为说话内容的片段才进入翻译；音乐、笑声、掌声和环境声不生成字幕。</p></details>
       <details><summary>制作完成后需要校对吗？</summary><p>建议播放成片，检查字幕内容和声音是否一致。软件提供字幕校对功能，可修改文字和起止时间；请保留原视频。</p></details>
