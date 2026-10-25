@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#071a38">
-  <meta name="description" content="硬核 3.26：在 Mac 本地识别英文、日文对白与画面字幕，翻译为中文并生成双语字幕成片。">
+  <meta name="theme-color" content="#0c121b">
+  <meta name="description" content="硬核双语字幕工作台：新版深色三栏界面，左侧二级设置，自动识别英文、日文并生成中文字幕。查看真实 App 界面与当前公开下载版本。">
   <title>硬核 3.26｜本地双语字幕工作台</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="studio.css?v=20261025">
 </head>
 <body>
   <header class="nav-shell">
@@ -17,8 +18,9 @@
       </a>
       <button class="menu" type="button" aria-expanded="false" aria-controls="nav-links">菜单</button>
       <div class="nav-links" id="nav-links">
+        <a href="#workspace">新版界面</a>
         <a href="#features">功能</a>
-        <a href="#verification">性能验证</a>
+        <a href="#verification">验证说明</a>
         <a href="#requirements">安装要求</a>
         <a class="nav-cta" href="#download">下载软件</a>
       </div>
@@ -28,24 +30,45 @@
   <main id="top">
     <section class="hero section">
       <div class="hero-copy">
-        <div class="eyebrow"><span></span>硬核 3.26 · Mac 双语字幕工具</div>
+        <div class="eyebrow"><span></span>硬核 3.26 · 深色工作台</div>
         <h1>把视频对白，变成<br><em>清楚可靠的双语成片</em></h1>
         <p class="hero-lead">自动判断英文、日文、语音或画面字幕。画面已有英文时保留英文，只新增中文；没有字幕时生成中英双语。音乐、笑声、掌声与环境音不翻译。</p>
         <div class="hero-actions">
           <a class="button primary" href="#download">下载并安装硬核</a>
         </div>
-        <p id="experience-status">Mac 版本现已提供标准安装包，无需手动拖动。网页在线翻译尚未开放，请下载 App 在本机使用。</p>
+        <p id="experience-status">新版界面已同步展示：视频预览、字幕校对、左侧二级设置。网页在线翻译尚未开放；公开下载版本与新版展示的区别，请见下方说明。</p>
         <div class="trust-row">
-          <span>✓ 本地识别</span><span>✓ 原声音保留</span><span>✓ 成片自动自检</span>
+          <span>✓ 本地识别</span><span>✓ 保留原声</span><span>✓ 字幕可校对</span>
         </div>
       </div>
       <div class="hero-visual" aria-label="硬核应用界面预览">
         <div class="glow"></div>
         <div class="window">
-          <div class="window-bar"><span></span><span></span><span></span><b>硬核 3.26</b></div>
-          <img src="assets/app-interface.jpg" alt="硬核 3.26 当前任务、成片预览与字幕校对界面">
+          <div class="window-bar"><span></span><span></span><span></span><b>硬核 · 新版深色工作台</b></div>
+          <img src="assets/studio-build332.jpg" width="1100" height="679" alt="硬核 Build 332 实际原生界面：左侧导航、中间视频预览和开始处理、右侧字幕校对">
         </div>
       </div>
+    </section>
+
+    <section class="section workspace-showcase" id="workspace" aria-labelledby="workspace-title">
+      <div class="section-heading left">
+        <span>与新版 App 同步</span>
+        <h2 id="workspace-title">把空间留给视频<br>把设置收在左侧</h2>
+        <p>点击导入视频，再点击“开始处理”。字幕集中在右侧校对，水印、位置、明显度和模型设置在左侧展开，不再弹出大窗口挡住预览。</p>
+      </div>
+      <div class="interface-tabs" role="tablist" aria-label="新版 App 界面展示">
+        <button type="button" id="studio-tab" role="tab" aria-selected="true" aria-controls="studio-panel">工作台</button>
+        <button type="button" id="settings-tab" role="tab" aria-selected="false" aria-controls="settings-panel" tabindex="-1">左侧二级设置</button>
+      </div>
+      <figure class="interface-panel" id="studio-panel" role="tabpanel" aria-labelledby="studio-tab">
+        <a href="assets/studio-build332.jpg" target="_blank" rel="noopener" aria-label="查看工作台大图"><img src="assets/studio-build332.jpg" width="1100" height="679" loading="lazy" alt="新版工作台实际截图，设置收起时，视频预览与字幕校对并排显示"></a>
+        <figcaption>实际 App 界面 · Build 332。点击图片可查看大图。这是界面展示，不是网页翻译器。</figcaption>
+      </figure>
+      <figure class="interface-panel" id="settings-panel" role="tabpanel" aria-labelledby="settings-tab" hidden>
+        <a href="assets/settings-build332.jpg" target="_blank" rel="noopener" aria-label="查看左侧二级设置大图"><img src="assets/settings-build332.jpg" width="1100" height="679" loading="lazy" alt="新版 App 的设置在左侧菜单下方展开，包含水印文字、显示位置、明显度与模型下载，不遮挡视频"></a>
+        <figcaption>点击“设置”展开，再点收起。小窗口中设置单独滚动，视频和字幕区不移动。水印和任务沿用原有保存方式。</figcaption>
+      </figure>
+      <p class="version-note">版本说明：以上展示为新版 Build 332。官网当前可下载的仍是 Build 327（旧界面）；新版安装包尚未上传，不会通过旧链接提供。</p>
     </section>
 
     <section class="section" id="wildlife-demo" aria-labelledby="wildlife-title">
@@ -58,14 +81,14 @@
         <source src="https://upload.wikimedia.org/wikipedia/commons/d/d6/Elephants_crossing_road.webm" type="video/webm">
         你的浏览器暂不支持此视频，请打开下方素材来源观看。
       </video>
-      <p style="font-size:14px;line-height:1.8;color:#62748e">素材：L. Shyamal / Wikimedia Commons，CC0 1.0。播放器从 Wikimedia 加载视频，外部网络可能影响速度。<a href="https://commons.wikimedia.org/wiki/File:Elephants_crossing_road.webm" target="_blank" rel="noopener noreferrer">查看来源或无法播放时点这里</a> · <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer">授权说明</a></p>
+      <p class="media-attribution">素材：L. Shyamal / Wikimedia Commons，CC0 1.0。播放器从 Wikimedia 加载视频，外部网络可能影响速度。<a href="https://commons.wikimedia.org/wiki/File:Elephants_crossing_road.webm" target="_blank" rel="noopener noreferrer">查看来源或无法播放时点这里</a> · <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer">授权说明</a></p>
     </section>
 
     <section class="facts" aria-label="产品特点">
       <article><strong>全自动</strong><span>一键识别、翻译、生成成片</span></article>
       <article><strong>本地优先</strong><span>识别在 Mac 上完成，保护素材隐私</span></article>
       <article><strong>不乱翻</strong><span>只处理说话内容，跳过非语言声音</span></article>
-      <article><strong>不降帧</strong><span>导出后检查时长与实际帧率</span></article>
+      <article><strong>输出自检</strong><span>导出后检查时长与实际帧率</span></article>
     </section>
 
     <section class="section" id="features">
@@ -117,11 +140,11 @@
         </div>
       </div>
       <div class="metrics-card">
-        <span class="metric-label">当前开发构建验证</span>
-        <div class="metric"><strong>63</strong><span>项软件回归检查 · Build 327</span></div>
-        <div class="metric"><strong>30 → 30</strong><span>fps 实测源片与成片一致</span></div>
-        <div class="metric"><strong>0.01 秒</strong><span>一次 92.8 秒样片的时长差</span></div>
-        <small>以上为指定测试样片结果，不代表所有素材的固定速度或精度承诺。</small>
+        <span class="metric-label">新版 Build 332 开发检查</span>
+        <div class="metric"><strong>73</strong><span>项软件回归检查通过</span></div>
+        <div class="metric"><strong>45</strong><span>项安装包内容与结构检查通过</span></div>
+        <div class="metric"><strong>19</strong><span>项布局、无设置弹窗及设置保留检查通过</span></div>
+        <small>这些是新版开发检查，不是识别精度或处理速度认证；也不等于另一台 Mac 的完整实机验证。当前公开下载仍是 Build 327。</small>
       </div>
     </section>
 
@@ -133,12 +156,12 @@
       <div class="requirements-grid">
         <div class="system-card">
           <h3>在 App 中一键完成</h3>
-          <p>选择视频后点击一键处理，软件自动识别、翻译并生成成片和 SRT，无需逐步点击。</p>
+          <p>在 App 中选择视频后，一键完成识别、翻译、成片和 SRT 导出。新版使用“开始处理”按钮，设置在左侧展开；当前公开安装包仍是旧界面 Build 327。</p>
           <p>下载 PKG → 双击 → 按“继续、安装”操作。安装器会把 App 放入“应用程序”，无需复制或拖动；系统可能要求这台 Mac 的登录密码或触控 ID 授权。</p>
           <p>首次识别需在 App 中点击“下载并启用”，下载约 1.5GB 的模型；系统翻译资源也可能需要下载。本包尚未完成 Developer ID 签名和苹果公证，macOS 仍可能阻止运行。</p>
         </div>
         <aside class="system-card">
-          <span>系统要求</span>
+          <span>当前公开下载 · Build 327</span>
           <h3>Apple Silicon Mac</h3>
           <ul>
             <li>macOS 26.4 或更高版本</li>
@@ -146,18 +169,20 @@
             <li>首次下载模型需要网络</li>
             <li>建议为长视频预留充足磁盘空间</li>
           </ul>
+          <p class="system-note">新版 Build 332 的构建目标为 macOS 15.7 起，但尚未提供公开安装包，也未完成另一台 15.7 Mac 的完整验证。</p>
         </aside>
       </div>
     </section>
 
     <section class="download section" id="download">
       <div>
-        <span class="pill">Mac 下载</span>
-        <h2>下载硬核 3.26</h2>
+        <span class="pill">当前公开下载 · Build 327</span>
+        <h2>下载当前可用版</h2>
+        <p class="download-version-note">请注意：这里下载的是旧界面 Build 327，不是上方展示的新版 Build 332。新版安装包尚未上传。</p>
         <p>2026-10-20 更新 · 3.26 Build 327。Apple Silicon Mac，macOS 26.4 及以上。补齐应用图标、标准安装向导，并包含字幕延迟修复。</p><p style="margin-top:12px">已通过 63 项软件检查、44 项安装包检查；尚未完成另一台干净 Mac 的完整验证。本包未签名公证，系统仍可能阻止运行。请保留原视频并复核成片。</p>
       </div>
       <div class="download-actions">
-        <a class="button light" href="downloads/Yinghe-3.26-build327-AppleSilicon.pkg" download>下载 Mac 安装包 · 3.3MB</a>
+        <a class="button light" href="downloads/Yinghe-3.26-build327-AppleSilicon.pkg" download>下载 Build 327 · 旧界面 · 3.3MB</a>
         <a class="release-link" href="downloads/install-build327.txt">查看安装说明与校验值 →</a><br><a class="release-link" href="https://github.com/541994282-dev/yinghe-beta/issues/new" target="_blank" rel="noopener">安装或使用遇到问题？反馈给我们 →</a>
       </div>
     </section>
@@ -177,6 +202,6 @@
     <p>本地识别 · 隐私优先 · 结果可复核</p>
     <p class="copyright">© <span id="year"></span> 硬核双语字幕工作台。</p>
   </footer>
-  <script src="app.js"></script>
+  <script src="app.js?v=20261025"></script>
 </body>
 </html>
