@@ -2,206 +2,92 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0c121b">
-  <meta name="description" content="硬核双语字幕工作台：新版深色三栏界面，左侧二级设置，自动识别英文、日文并生成中文字幕。查看真实 App 界面与当前公开下载版本。">
-  <title>硬核 3.26｜本地双语字幕工作台</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="studio.css?v=20261025">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0c111a">
+  <meta name="description" content="硬核双语字幕工作台。预览本地视频，设置文字水印，下载 Mac App 制作双语成片。">
+  <title>硬核｜双语字幕工作台</title>
+  <link rel="stylesheet" href="workspace.css?v=20261025b">
+  <script src="app.js?v=20261025b" defer></script>
 </head>
 <body>
-  <header class="nav-shell">
-    <nav class="nav" aria-label="主导航">
-      <a class="brand" href="#top" aria-label="硬核首页">
-        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
-        <span><strong>硬核</strong><small>双语字幕工作台</small></span>
+  <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-studio" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-4-4 4 4 4-4M4 15v5h16v-5"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="8" cy="18" r="2"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M3 7V4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v3M7 3l4 4m3-4 4 4m-8 5 5 3-5 3z"/></symbol>
+    <symbol id="i-caption" viewBox="0 0 24 24"><path d="M20 3H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3v3l5-3h8a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Z"/><path d="M7 8h10M7 13h6"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 4 12 8-12 8Z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6Z"/><path d="m8 12 3 3 5-6"/></symbol>
+  </svg>
+
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="工作台导航">
+      <a class="brand" href="#studio" aria-label="硬核工作台">
+        <span class="brand-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+        <strong>硬核</strong><span class="brand-subtitle">双语字幕工作台</span>
       </a>
-      <button class="menu" type="button" aria-expanded="false" aria-controls="nav-links">菜单</button>
-      <div class="nav-links" id="nav-links">
-        <a href="#workspace">新版界面</a>
-        <a href="#features">功能</a>
-        <a href="#verification">验证说明</a>
-        <a href="#requirements">安装要求</a>
-        <a class="nav-cta" href="#download">下载软件</a>
-      </div>
-    </nav>
-  </header>
+      <nav class="navigation">
+        <a class="nav-item active" href="#studio" aria-current="page"><svg><use href="#i-studio"/></svg><span>工作台</span></a>
+        <button class="nav-item" type="button" data-download><svg><use href="#i-download"/></svg><span>下载 App</span></button>
+        <button class="nav-item settings-toggle" id="settings-toggle" type="button" aria-expanded="false" aria-controls="settings-panel"><svg><use href="#i-settings"/></svg><span>设置</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
+      </nav>
 
-  <main id="top">
-    <section class="hero section">
-      <div class="hero-copy">
-        <div class="eyebrow"><span></span>硬核 3.26 · 深色工作台</div>
-        <h1>把视频对白，变成<br><em>清楚可靠的双语成片</em></h1>
-        <p class="hero-lead">自动判断英文、日文、语音或画面字幕。画面已有英文时保留英文，只新增中文；没有字幕时生成中英双语。音乐、笑声、掌声与环境音不翻译。</p>
-        <div class="hero-actions">
-          <a class="button primary" href="#download">下载并安装硬核</a>
-        </div>
-        <p id="experience-status">新版界面已同步展示：视频预览、字幕校对、左侧二级设置。网页在线翻译尚未开放；公开下载版本与新版展示的区别，请见下方说明。</p>
-        <div class="trust-row">
-          <span>✓ 本地识别</span><span>✓ 保留原声</span><span>✓ 字幕可校对</span>
-        </div>
-      </div>
-      <div class="hero-visual" aria-label="硬核应用界面预览">
-        <div class="glow"></div>
-        <div class="window">
-          <div class="window-bar"><span></span><span></span><span></span><b>硬核 · 新版深色工作台</b></div>
-          <img src="assets/studio-build332.jpg" width="1100" height="679" alt="硬核 Build 332 实际原生界面：左侧导航、中间视频预览和开始处理、右侧字幕校对">
-        </div>
-      </div>
-    </section>
+      <section class="sidebar-settings" id="settings-panel" aria-label="预览水印设置" hidden>
+        <label for="watermark-text">文字水印</label>
+        <input id="watermark-text" type="text" placeholder="输入文字（可选）" maxlength="40" autocomplete="off">
+        <label for="watermark-position">显示位置</label>
+        <select id="watermark-position"><option value="top-right">右上角</option><option value="top-left">左上角</option><option value="bottom-right">右下角</option><option value="bottom-left">左下角</option></select>
+        <label for="watermark-opacity">明显度</label>
+        <select id="watermark-opacity"><option value="0.65">适中</option><option value="0.35">较淡</option><option value="0.9">明显</option></select>
+        <button class="text-button" id="clear-watermark" type="button">清除水印</button>
+        <p>仅调整当前视频预览。</p>
+      </section>
+      <div class="sidebar-footer"><svg><use href="#i-shield"/></svg><span>视频仅在本机预览</span></div>
+    </aside>
 
-    <section class="section workspace-showcase" id="workspace" aria-labelledby="workspace-title">
-      <div class="section-heading left">
-        <span>与新版 App 同步</span>
-        <h2 id="workspace-title">把空间留给视频<br>把设置收在左侧</h2>
-        <p>点击导入视频，再点击“开始处理”。字幕集中在右侧校对，水印、位置、明显度和模型设置在左侧展开，不再弹出大窗口挡住预览。</p>
-      </div>
-      <div class="interface-tabs" role="tablist" aria-label="新版 App 界面展示">
-        <button type="button" id="studio-tab" role="tab" aria-selected="true" aria-controls="studio-panel">工作台</button>
-        <button type="button" id="settings-tab" role="tab" aria-selected="false" aria-controls="settings-panel" tabindex="-1">左侧二级设置</button>
-      </div>
-      <figure class="interface-panel" id="studio-panel" role="tabpanel" aria-labelledby="studio-tab">
-        <a href="assets/studio-build332.jpg" target="_blank" rel="noopener" aria-label="查看工作台大图"><img src="assets/studio-build332.jpg" width="1100" height="679" loading="lazy" alt="新版工作台实际截图，设置收起时，视频预览与字幕校对并排显示"></a>
-        <figcaption>实际 App 界面 · Build 332。点击图片可查看大图。这是界面展示，不是网页翻译器。</figcaption>
-      </figure>
-      <figure class="interface-panel" id="settings-panel" role="tabpanel" aria-labelledby="settings-tab" hidden>
-        <a href="assets/settings-build332.jpg" target="_blank" rel="noopener" aria-label="查看左侧二级设置大图"><img src="assets/settings-build332.jpg" width="1100" height="679" loading="lazy" alt="新版 App 的设置在左侧菜单下方展开，包含水印文字、显示位置、明显度与模型下载，不遮挡视频"></a>
-        <figcaption>点击“设置”展开，再点收起。小窗口中设置单独滚动，视频和字幕区不移动。水印和任务沿用原有保存方式。</figcaption>
-      </figure>
-      <p class="version-note">版本说明：以上展示为新版 Build 332。官网当前可下载的仍是 Build 327（旧界面）；新版安装包尚未上传，不会通过旧链接提供。</p>
-    </section>
+    <main class="workspace" id="studio">
+      <header class="workspace-header"><div><span class="section-label">STUDIO</span><h1>工作台</h1></div><button class="compact-button" type="button" data-download><svg><use href="#i-download"/></svg>下载 Mac App</button></header>
+      <div class="workspace-grid">
+        <section class="video-column" aria-label="视频工作区">
+          <div class="preview-card">
+            <div class="panel-header"><h2>视频预览</h2><button class="text-button" id="replace-video" type="button" hidden>更换视频</button></div>
+            <div class="preview-stage" id="preview-stage">
+              <button class="import-area" id="choose-video" type="button" aria-label="选择本地视频文件">
+                <svg class="import-icon"><use href="#i-video"/></svg>
+                <strong>导入视频，开始制作</strong>
+                <span>点击选择，或将视频拖到这里</span>
+                <small>MP4 · MOV · M4V · WEBM</small>
+              </button>
+              <div class="video-surface" id="video-surface" hidden><video id="video-preview" controls playsinline preload="metadata" aria-label="本地视频预览"></video><span class="preview-watermark top-right" id="preview-watermark" hidden></span></div>
+            </div>
+            <div class="file-info" id="file-info"><span id="file-name">尚未选择视频</span><span id="file-meta">本地预览 · 不上传</span></div>
+          </div>
 
-    <section class="section" id="wildlife-demo" aria-labelledby="wildlife-title">
-      <div class="section-heading left">
-        <span>野生动物素材展示</span>
-        <h2 id="wildlife-title">走近自然，看见野生动物</h2>
-        <p>大象穿过道路 · 约40秒。以下为授权原始素材展示，不是硬核自动翻译成片。</p>
-      </div>
-      <video controls playsinline preload="none" aria-label="大象穿过道路，野生动物原始素材" style="display:block;width:100%;aspect-ratio:16/9;max-height:620px;background:#071a38;border-radius:24px">
-        <source src="https://upload.wikimedia.org/wikipedia/commons/d/d6/Elephants_crossing_road.webm" type="video/webm">
-        你的浏览器暂不支持此视频，请打开下方素材来源观看。
-      </video>
-      <p class="media-attribution">素材：L. Shyamal / Wikimedia Commons，CC0 1.0。播放器从 Wikimedia 加载视频，外部网络可能影响速度。<a href="https://commons.wikimedia.org/wiki/File:Elephants_crossing_road.webm" target="_blank" rel="noopener noreferrer">查看来源或无法播放时点这里</a> · <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer">授权说明</a></p>
-    </section>
+          <button class="primary-action" type="button" data-download><svg><use href="#i-play"/></svg><span>下载 App 开始翻译</span></button>
+          <p class="availability">网页翻译尚未开放，可先预览视频；完整处理请使用 App。</p>
+          <div class="status-bar" role="status" aria-live="polite"><span class="status-dot" id="status-dot"></span><span id="status-text">等待导入视频</span><span class="status-count">0 条字幕</span></div>
+        </section>
 
-    <section class="facts" aria-label="产品特点">
-      <article><strong>全自动</strong><span>一键识别、翻译、生成成片</span></article>
-      <article><strong>本地优先</strong><span>识别在 Mac 上完成，保护素材隐私</span></article>
-      <article><strong>不乱翻</strong><span>只处理说话内容，跳过非语言声音</span></article>
-      <article><strong>输出自检</strong><span>导出后检查时长与实际帧率</span></article>
-    </section>
+        <section class="subtitle-panel" aria-labelledby="subtitle-title">
+          <div class="panel-header"><h2 id="subtitle-title">字幕校对</h2><span class="count-badge">0</span></div>
+          <div class="subtitle-empty"><div class="caption-icon"><svg><use href="#i-caption"/></svg></div><h3>暂无字幕</h3><p>使用 App 识别和翻译视频<br>再校对文字与时间</p></div>
+          <div class="subtitle-footer"><span>自动语种 → 中文</span><span>原声保留</span></div>
+        </section>
+      </div>
+    </main>
+  </div>
 
-    <section class="section" id="features">
-      <div class="section-heading">
-        <span>现在的硬核</span>
-        <h2>不是“给所有声音加字幕”<br>而是先理解视频，再决定怎么处理</h2>
-        <p>识别、翻译、字幕编排和视频导出在同一个工作台完成，减少反复切换工具。</p>
-      </div>
-      <div class="feature-grid">
-        <article class="feature-card accent">
-          <div class="icon">识</div><h3>自动识别内容</h3>
-          <p>自动区分英文、日文，以及语音或画面字幕。语种结果不可靠时停止自动翻译，避免生成错误字幕。</p>
-        </article>
-        <article class="feature-card">
-          <div class="icon">声</div><h3>只翻译说话</h3>
-          <p>音乐、笑声、掌声、关门声和环境声等非语言内容不翻译、不生成字幕，原视频声音保持不变。</p>
-        </article>
-        <article class="feature-card">
-          <div class="icon">字</div><h3>识别画面字幕</h3>
-          <p>逐段检查视频已有文字。画面已有英文字幕时不遮挡、不重复嵌入英文，只在合适位置补中文。</p>
-        </article>
-        <article class="feature-card">
-          <div class="icon">帧</div><h3>保留真实帧率</h3>
-          <p>针对高帧率和可变帧率素材选择合适导出方式，并对输出时长、目标帧时间和实际帧率进行自检。</p>
-        </article>
-        <article class="feature-card">
-          <div class="icon">校</div><h3>字幕可校对</h3>
-          <p>生成前可修改全文和起止时间；成片与双语 SRT 自动保存，方便继续剪辑或交付。</p>
-        </article>
-        <article class="feature-card">
-          <div class="icon">隐</div><h3>本地处理优先</h3>
-          <p>语音识别引擎随 App 提供；识别模型首次使用时下载到本机，日常素材无需上传到视频服务器。</p>
-        </article>
-      </div>
-    </section>
+  <input class="visually-hidden" id="video-file" type="file" accept="video/mp4,video/quicktime,video/x-m4v,video/webm,.mp4,.mov,.m4v,.webm" tabindex="-1" aria-label="本地视频文件">
 
-    <section class="section verification" id="verification">
-      <div class="verification-copy">
-        <div class="section-heading left">
-          <span>实测与自检</span>
-          <h2>“导出成功”还不够<br>成片必须能复核</h2>
-          <p>硬核会在导出后检查时长、时间轴与实际帧率。字幕规则另有回归检查，避免修复一个问题又带回旧问题。</p>
-        </div>
-        <div class="check-list">
-          <p><i>✓</i> 原视频和既有成片始终保留</p>
-          <p><i>✓</i> 高帧率素材不会静默降成 30fps 或 17fps</p>
-          <p><i>✓</i> 英文字幕段与无字幕语音段可在同一视频中分别处理</p>
-          <p><i>✓</i> 识别失败时停止，不用错误结果继续生成</p>
-        </div>
-      </div>
-      <div class="metrics-card">
-        <span class="metric-label">新版 Build 332 开发检查</span>
-        <div class="metric"><strong>73</strong><span>项软件回归检查通过</span></div>
-        <div class="metric"><strong>45</strong><span>项安装包内容与结构检查通过</span></div>
-        <div class="metric"><strong>19</strong><span>项布局、无设置弹窗及设置保留检查通过</span></div>
-        <small>这些是新版开发检查，不是识别精度或处理速度认证；也不等于另一台 Mac 的完整实机验证。当前公开下载仍是 Build 327。</small>
-      </div>
-    </section>
-
-    <section class="section requirements" id="requirements">
-      <div class="section-heading left">
-        <span>安装与使用</span>
-        <h2>下载、安装，开始制作字幕</h2>
-      </div>
-      <div class="requirements-grid">
-        <div class="system-card">
-          <h3>在 App 中一键完成</h3>
-          <p>在 App 中选择视频后，一键完成识别、翻译、成片和 SRT 导出。新版使用“开始处理”按钮，设置在左侧展开；当前公开安装包仍是旧界面 Build 327。</p>
-          <p>下载 PKG → 双击 → 按“继续、安装”操作。安装器会把 App 放入“应用程序”，无需复制或拖动；系统可能要求这台 Mac 的登录密码或触控 ID 授权。</p>
-          <p>首次识别需在 App 中点击“下载并启用”，下载约 1.5GB 的模型；系统翻译资源也可能需要下载。本包尚未完成 Developer ID 签名和苹果公证，macOS 仍可能阻止运行。</p>
-        </div>
-        <aside class="system-card">
-          <span>当前公开下载 · Build 327</span>
-          <h3>Apple Silicon Mac</h3>
-          <ul>
-            <li>macOS 26.4 或更高版本</li>
-            <li>仅提供 M 系列芯片版本，不支持 Intel Mac</li>
-            <li>首次下载模型需要网络</li>
-            <li>建议为长视频预留充足磁盘空间</li>
-          </ul>
-          <p class="system-note">新版 Build 332 的构建目标为 macOS 15.7 起，但尚未提供公开安装包，也未完成另一台 15.7 Mac 的完整验证。</p>
-        </aside>
-      </div>
-    </section>
-
-    <section class="download section" id="download">
-      <div>
-        <span class="pill">当前公开下载 · Build 327</span>
-        <h2>下载当前可用版</h2>
-        <p class="download-version-note">请注意：这里下载的是旧界面 Build 327，不是上方展示的新版 Build 332。新版安装包尚未上传。</p>
-        <p>2026-10-20 更新 · 3.26 Build 327。Apple Silicon Mac，macOS 26.4 及以上。补齐应用图标、标准安装向导，并包含字幕延迟修复。</p><p style="margin-top:12px">已通过 63 项软件检查、44 项安装包检查；尚未完成另一台干净 Mac 的完整验证。本包未签名公证，系统仍可能阻止运行。请保留原视频并复核成片。</p>
-      </div>
-      <div class="download-actions">
-        <a class="button light" href="downloads/Yinghe-3.26-build327-AppleSilicon.pkg" download>下载 Build 327 · 旧界面 · 3.3MB</a>
-        <a class="release-link" href="downloads/install-build327.txt">查看安装说明与校验值 →</a><br><a class="release-link" href="https://github.com/541994282-dev/yinghe-beta/issues/new" target="_blank" rel="noopener">安装或使用遇到问题？反馈给我们 →</a>
-      </div>
-    </section>
-
-    <section class="section faq">
-      <div class="section-heading left"><span>常见问题</span><h2>开始前需要知道</h2></div>
-      <details><summary>下载后提示无法验证开发者怎么办？</summary><p>本包未签名公证。请核对本页来源与安装说明中的 SHA256，只在确认来源可信、文件未被修改时，按 <a href="https://support.apple.com/zh-cn/102445" target="_blank" rel="noopener">苹果官方说明</a>决定是否允许打开。安装器不会关闭或绕过系统保护；若不能或不愿手动确认，请暂不安装并反馈问题。</p></details>
-      <details><summary>别人下载后为什么还需要下载语言模型？</summary><p>App 内置识别引擎，但约 1.5GB 的识别模型不放在安装包中。首次使用时下载一次，之后保存在本机重复使用；中文翻译也可能需要下载系统语言资源。</p></details>
-      <details><summary>视频已经有英文字幕，会被遮住吗？</summary><p>当前规则不会使用黑色遮盖。系统会保留原画面中的英文字幕，并只新增中文；没有画面字幕的对白段则生成中英双语。</p></details>
-      <details><summary>音乐或环境声会不会被翻译？</summary><p>不会。只有检测为说话内容的片段才进入翻译；音乐、笑声、掌声和环境声不生成字幕。</p></details>
-      <details><summary>制作完成后需要校对吗？</summary><p>建议播放成片，检查字幕内容和声音是否一致。软件提供字幕校对功能，可修改文字和起止时间；请保留原视频。</p></details>
-    </section>
-  </main>
-
-  <footer>
-    <a class="brand footer-brand" href="#top"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span><strong>硬核</strong><small>双语字幕工作台</small></span></a>
-    <p>本地识别 · 隐私优先 · 结果可复核</p>
-    <p class="copyright">© <span id="year"></span> 硬核双语字幕工作台。</p>
-  </footer>
-  <script src="app.js?v=20261025"></script>
+  <dialog id="download-dialog" aria-labelledby="download-title">
+    <div class="dialog-heading"><div><span class="section-label">MAC APP</span><h2 id="download-title">下载硬核</h2></div><button class="close-button" id="close-download" type="button" aria-label="关闭下载窗口">×</button></div>
+    <p class="dialog-lead">在 Mac 上识别、翻译和导出双语成片。</p>
+    <div class="download-summary"><strong>Apple Silicon · macOS 26.4 起</strong><span>当前安装包：3.26（Build 327，旧界面）</span></div>
+    <p class="download-caveat">本页展示新版工作台布局；新版安装包尚未上架。</p>
+    <a class="download-link" href="downloads/Yinghe-3.26-build327-AppleSilicon.pkg" download>下载安装包 · 3.3 MB<svg><use href="#i-download"/></svg></a>
+    <details><summary>安装须知</summary><p>双击安装包，按提示安装。不支持 Intel Mac。首次使用需下载约 1.5 GB 识别模型，系统翻译资源也可能需要下载。</p><p>当前包未完成 Developer ID 签名和苹果公证，macOS 可能阻止运行。请确认来源并查看安装说明。</p><a href="downloads/install-build327.txt" target="_blank" rel="noopener">安装说明与校验值 ↗</a></details>
+    <a class="feedback-link" href="https://github.com/541994282-dev/yinghe-beta/issues/new" target="_blank" rel="noopener">使用反馈 ↗</a>
+  </dialog>
 </body>
 </html>
