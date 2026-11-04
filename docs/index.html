@@ -4,10 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0c111a">
-  <meta name="description" content="硬核双语字幕工作台。预览本地视频，设置文字水印，下载 Mac App 制作双语成片。">
+  <meta name="description" content="硬核双语字幕工作台。选择视频，一键翻译并下载双语成片。">
   <title>硬核｜双语字幕工作台</title>
-  <link rel="stylesheet" href="workspace.css?v=335">
-  <script src="app.js?v=335" defer></script>
+  <link rel="stylesheet" href="workspace.css?v=335-web20-20261103">
+  <script src="app.js?v=335-web20-20261103" defer></script>
+  <script src="translation.js?v=335-web20-20261103" defer></script>
 </head>
 <body>
   <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -43,7 +44,7 @@
         <button class="text-button" id="clear-watermark" type="button">清除水印</button>
         <p>仅调整当前视频预览。</p>
       </section>
-      <div class="sidebar-footer"><svg><use href="#i-shield"/></svg><span>视频仅在本机预览</span></div>
+      <div class="sidebar-footer"><svg><use href="#i-shield"/></svg><span>结果保留 24 小时</span></div>
     </aside>
 
     <main class="workspace" id="studio">
@@ -61,17 +62,21 @@
               </button>
               <div class="video-surface" id="video-surface" hidden><video id="video-preview" controls playsinline preload="metadata" aria-label="本地视频预览"></video><span class="preview-watermark top-right" id="preview-watermark" hidden></span></div>
             </div>
-            <div class="file-info" id="file-info"><span id="file-name">尚未选择视频</span><span id="file-meta">本地预览 · 不上传</span></div>
+            <div class="file-info" id="file-info"><span id="file-name">尚未选择视频</span><span id="file-meta">点击翻译后上传</span></div>
           </div>
 
-          <button class="primary-action" type="button" data-download><svg><use href="#i-play"/></svg><span>下载 App 开始翻译</span></button>
-          <p class="availability">网页翻译尚未开放，可先预览视频；完整处理请使用 App。</p>
-          <div class="status-bar" role="status" aria-live="polite"><span class="status-dot" id="status-dot"></span><span id="status-text">等待导入视频</span><span class="status-count">0 条字幕</span></div>
+          <button class="primary-action" id="start-translation" type="button" disabled><svg><use href="#i-play"/></svg><span id="start-label">一键翻译</span></button>
+          <p class="availability" id="service-status">正在检查处理服务</p>
+          <p class="availability">剩余体验：<span id="remaining-time">20:00</span> · 同一浏览器累计 · 每个视频最大 75 MB</p>
+          <p class="availability">点击翻译后，视频经 Cloudflare 转发至处理电脑；素材与结果保留 24 小时。</p>
+          <div class="result-actions" id="result-actions" hidden><a id="download-video" download>下载成片</a><a id="download-subtitles" download>下载字幕 SRT</a></div>
+          <div class="status-bar" role="status" aria-live="polite"><span class="status-dot" id="status-dot"></span><span id="status-text">等待导入视频</span><span class="status-count" id="status-count">0 条字幕</span></div>
         </section>
 
         <section class="subtitle-panel" aria-labelledby="subtitle-title">
-          <div class="panel-header"><h2 id="subtitle-title">字幕校对</h2><span class="count-badge">0</span></div>
-          <div class="subtitle-empty"><div class="caption-icon"><svg><use href="#i-caption"/></svg></div><h3>暂无字幕</h3><p>使用 App 识别和翻译视频<br>再校对文字与时间</p></div>
+          <div class="panel-header"><h2 id="subtitle-title">字幕预览</h2><span class="count-badge" id="subtitle-count">0</span></div>
+          <div class="subtitle-empty" id="subtitle-empty"><div class="caption-icon"><svg><use href="#i-caption"/></svg></div><h3>暂无字幕</h3><p>翻译完成后显示字幕<br>点击字幕跳转播放</p></div>
+          <div class="subtitle-list" id="subtitle-list" hidden></div>
           <div class="subtitle-footer"><span>自动语种 → 中文</span><span>原声保留</span></div>
         </section>
       </div>
