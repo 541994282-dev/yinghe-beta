@@ -42,13 +42,13 @@ function restoreOriginalPreview() {
 }
 function importVideo(file) {
   if (!file || running) return;
-  if (activeJob) return setStatus('当前任务尚未结束，点击“继续查看任务”恢复连接',true);
+  if (activeJob && !uploadNeedsFile) return setStatus('当前任务尚未结束，点击“继续查看任务”恢复连接',true);
   if (!/\.(mp4|mov|m4v|webm)$/i.test(file.name) || !file.size) {
     setStatus('请选择 MP4、MOV、M4V 或 WEBM 视频文件', true);
     return;
   }
   releaseVideo();
-  clearResult();
+  if (!activeJob) clearResult();
   currentFile = file;
   currentDuration = 0;
   videoUrl = URL.createObjectURL(file);
@@ -61,7 +61,7 @@ function importVideo(file) {
   byId('file-meta').textContent = (file.size / (1024 * 1024)).toFixed(1) + ' MB · 本地预览';
   setStatus('正在读取本地视频…');
   byId('start-translation').disabled = file.size > maxUploadBytes || remainingSeconds <= 0;
-  if (file.size > maxUploadBytes) setStatus('视频超过 75 MB，请选择较小的视频或下载 App 处理', true);
+  if (file.size > maxUploadBytes) setStatus('视频超过 1 GB，请选择较小的视频或下载 App 处理', true);
   updateWatermark();
 }
 byId('settings-toggle').addEventListener('click', () => {
@@ -108,7 +108,7 @@ video.addEventListener('loadedmetadata', () => {
   const seconds = String(Math.floor(duration % 60)).padStart(2, '0');
   const resolution = video.videoWidth + ' × ' + video.videoHeight;
   byId('file-meta').textContent = minutes + ':' + seconds + ' · ' + resolution;
-  setStatus(currentFile.size > maxUploadBytes ? '视频超过 75 MB，请选择较小的视频或使用 App' : '视频已就绪 · 点击一键翻译', currentFile.size > maxUploadBytes);
+  setStatus(currentFile.size > maxUploadBytes ? '视频超过 1 GB，请选择较小的视频或使用 App' : uploadNeedsFile ? '已选择视频 · 点击继续上传' : '视频已就绪 · 点击一键翻译', currentFile.size > maxUploadBytes);
 });
 video.addEventListener('error', () => {
   if (resultUrl) setStatus('成片已生成，浏览器无法播放；可下载后打开', true);

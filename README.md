@@ -4,6 +4,8 @@
 
 对白翻译、过滤非对白声音字幕，保留原声。
 
+网页单视频最大 1 GB，支持分块上传和中断续传；同一浏览器累计体验 20 分钟。
+
 - [下载 M 系列版](https://541994282-dev.github.io/yinghe-beta/downloads/Yinghe-3.26-build335-AppleSilicon.pkg)
 - [下载 Intel 版](https://541994282-dev.github.io/yinghe-beta/downloads/Yinghe-3.26-build335-Intel.pkg)
 - [安装说明与校验值](https://541994282-dev.github.io/yinghe-beta/downloads/install-build335.txt)
