@@ -1,14 +1,16 @@
 # 硬核 · 双语字幕工作台
 
-[官网 · 累计 30 分钟翻译体验](https://541994282-dev.github.io/yinghe-beta/) · **3.26 Build 335** · macOS 15.7 起（最低构建要求）
+[官网 · 累计 30 分钟翻译体验](https://541994282-dev.github.io/yinghe-beta/) · **3.26 Build 336** · macOS 15.7 起（最低构建要求）
 
 对白翻译、过滤非对白声音字幕，保留原声。
 
+App 和网页均在原“一键翻译”按钮处切换为“取消翻译”。
+
 网页单视频最大 1 GB，支持并行分块上传、中断续传和取消任务；同一浏览器累计体验 30 分钟，按成功视频实际时长扣除，取消不扣时。
 
-- [下载 M 系列版](https://541994282-dev.github.io/yinghe-beta/downloads/Yinghe-3.26-build335-AppleSilicon.pkg)
-- [下载 Intel 版](https://541994282-dev.github.io/yinghe-beta/downloads/Yinghe-3.26-build335-Intel.pkg)
-- [安装说明与校验值](https://541994282-dev.github.io/yinghe-beta/downloads/install-build335.txt)
+- [下载 M 系列版](https://541994282-dev.github.io/yinghe-beta/downloads/Yinghe-3.26-build336-AppleSilicon.pkg)
+- [下载 Intel 版](https://541994282-dev.github.io/yinghe-beta/downloads/Yinghe-3.26-build336-Intel.pkg)
+- [安装说明与校验值](https://541994282-dev.github.io/yinghe-beta/downloads/install-build336.txt)
 
 <details><summary>安装须知</summary>
 
