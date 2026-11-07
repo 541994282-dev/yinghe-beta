@@ -19,6 +19,9 @@ let activeJob = null;
 let ownedJobId = null;
 let uploadNeedsFile = false;
 let processingCaptions = [];
+let runController = null;
+let cancelling = false;
+const stoppedUpload = () => Object.assign(new Error('操作已停止'), {name:'AbortError'});
 
 function rememberJob(job) {
   try { localStorage.setItem(jobStorageKey, JSON.stringify(job)); } catch (_) { /* Private browsing may disable storage. */ }
@@ -47,6 +50,7 @@ function finishJob(job) {
   if (ownedJobId === job.id) ownedJobId = null;
 }
 async function reserveJob() {
+  const signal = runController?.signal;
   const reserve = async () => {
     const saved = savedJob();
     if (saved && !saved.completed) {
@@ -56,6 +60,7 @@ async function reserveJob() {
     const id = crypto.randomUUID().replace(/-/g, '');
     const chunked = currentFile.size > singleUploadBytes;
     const file = chunked ? {size:currentFile.size,fingerprint:await fileFingerprint(currentFile)} : null;
+    if (signal?.aborted) throw stoppedUpload();
     const job = {id, requestId:id, name:currentFile.name, created:Date.now(),chunked,file};
     adoptJob(job);
     rememberJob(job);
@@ -80,14 +85,18 @@ function clearResult() {
   byId('status-count').textContent = '0 条字幕';
 }
 function setRunning(value) {
+  if (value && !running) runController = new AbortController();
   running = value;
   const restriction = !activeJob && !resultUrl ? videoRestriction() : '';
   byId('video-limit-message').textContent = restriction;
   byId('video-limit-message').hidden = !restriction;
-  byId('start-translation').disabled = value || (uploadNeedsFile ? !currentFile || currentFile.size > maxUploadBytes : !activeJob && (!currentFile || !!videoRestriction()));
+  byId('start-translation').disabled = value || cancelling || !!activeJob?.cancelRequested || (uploadNeedsFile ? !currentFile || currentFile.size > maxUploadBytes : !activeJob && (!currentFile || !!videoRestriction()));
   byId('replace-video').disabled = value || (!!activeJob && !uploadNeedsFile);
   byId('choose-video').disabled = value || (!!activeJob && !uploadNeedsFile);
   byId('start-label').textContent = value ? '正在处理…' : uploadNeedsFile ? '继续上传' : activeJob ? '继续查看任务' : restriction ? '请更换视频或使用 App' : '一键翻译';
+  byId('cancel-translation').hidden = !value && !activeJob && !cancelling;
+  byId('cancel-translation').disabled = cancelling;
+  byId('cancel-translation').textContent = cancelling ? '正在取消…' : activeJob?.cancelRequested ? '重试取消' : '取消';
 }
 async function fileFingerprint(file) {
   const sample = new Blob([JSON.stringify([file.name,file.size,file.lastModified||0]),file.slice(0,256*1024),file.slice(Math.max(0,file.size-256*1024))]);
@@ -99,9 +108,11 @@ function transientUpload(error) {
   return !error.apiRejected || [409,429,502,503,504].includes(error.status);
 }
 async function uploadRequest(path,options) {
+  const signal = runController?.signal;
   for (let attempt=0;attempt<5;attempt++) {
     try { return await apiJSON(path,options); }
     catch (error) {
+      if (signal?.aborted) throw error;
       if (!transientUpload(error) || attempt===4) throw error;
       setStatus('网络中断，正在恢复上传…',true);
       await uploadPause(attempt);
@@ -118,26 +129,95 @@ function validateUpload(info,job) {
   if (info.state!=='uploading' && info.state!=='failed' && info.receivedBytes!==info.size) throw new Error('上传尚未完整确认');
   if (info.state==='failed') { finishJob(job); throw new Error('上传任务已过期，请重新选择视频'); }
   if (!['uploading','queued','processing','done'].includes(info.state)) throw new Error('上传状态异常');
+  if (info.receivedChunks !== undefined) {
+    const count=Math.ceil(info.size/info.chunkBytes);
+    if (!Array.isArray(info.receivedChunks) || info.receivedChunks.length>count ||
+        new Set(info.receivedChunks).size!==info.receivedChunks.length ||
+        info.receivedChunks.some(index=>!Number.isInteger(index)||index<0||index>=count)) throw new Error('上传分块记录异常');
+  }
   return info;
 }
 async function uploadChunks(job,file) {
+  const signal=runController?.signal;
+  const assertActive=()=>{if(signal?.aborted || activeJob?.id!==job.id)throw stoppedUpload();};
   if (file.size!==job.file.size || await fileFingerprint(file)!==job.file.fingerprint) throw new Error('请选择原来的视频继续上传，已上传部分仍保留');
+  assertActive();
   const transfer=async()=>{
     const options={'Content-Type':'application/json','X-Request-Id':job.id};
     let info=validateUpload(await uploadRequest('/uploads',{method:'POST',headers:options,
       body:JSON.stringify({size:file.size,name:file.name,fingerprint:job.file.fingerprint}),signal:AbortSignal.timeout(180000)}),job);
+    const began=Date.now(), initial=info.uploadedBytes??info.receivedBytes;
+    const confirmed=new Set(info.receivedChunks||Array.from({length:Math.ceil(info.receivedBytes/info.chunkBytes)},(_,i)=>i));
+    const inFlight=new Map(), count=Math.ceil(file.size/info.chunkBytes);
+    const partSize=index=>Math.min(info.chunkBytes,file.size-index*info.chunkBytes);
+    const report=()=>{
+      assertActive();
+      const bytes=[...confirmed].reduce((sum,index)=>sum+partSize(index),0)+[...inFlight].reduce((sum,[index,loaded])=>sum+(confirmed.has(index)?0:loaded),0);
+      const elapsed=(Date.now()-began)/1000, rate=elapsed>0?(bytes-initial)/elapsed:0;
+      const detail=elapsed>=2&&rate>0 ? ' · '+(rate>=1024*1024?(rate/1024**2).toFixed(1)+' MB/秒':Math.round(rate/1024)+' KB/秒')+
+        ' · 预计剩余 '+(file.size-bytes>rate*60?Math.ceil((file.size-bytes)/rate/60)+' 分钟':Math.ceil((file.size-bytes)/rate)+' 秒') : '';
+      setStatus('正在上传视频 '+Math.min(99,Math.floor(bytes*100/file.size))+'%'+detail);
+    };
+    const merge=next=>{info=next;for(const index of next.receivedChunks||[])confirmed.add(index);};
+    // Older running backends remain compatible with the sequential path below.
+    if (Array.isArray(info.receivedChunks) && info.parallelChunks>1 && info.state==='uploading') {
+      const pending=new Set(); let failure;
+      const worker=async()=>{
+        while(!failure) {
+          assertActive();
+          const index=Array.from({length:count},(_,i)=>i).find(i=>!confirmed.has(i)&&!pending.has(i));
+          if(index===undefined)return;
+          pending.add(index);
+          try {
+            for(let attempt=0;;attempt++) {
+              assertActive();
+              inFlight.set(index,0);report();
+              try {
+                const next=validateUpload(await apiJSON('/uploads/'+job.id+'/chunks/'+index,{
+                  method:'POST',headers:{'Content-Type':'application/octet-stream','X-Request-Id':job.id},
+                  body:file.slice(index*info.chunkBytes,index*info.chunkBytes+partSize(index)),signal:AbortSignal.timeout(180000),
+                  onUploadProgress:loaded=>{if(!signal?.aborted){inFlight.set(index,Math.min(partSize(index),loaded));report();}}
+                }),job);
+                merge(next);
+                if(!confirmed.has(index))throw new Error('分块尚未确认');
+                break;
+              } catch(error) {
+                assertActive();
+                if(!transientUpload(error)||attempt>=4)throw error;
+                inFlight.delete(index);
+                setStatus('正在恢复上传，已完成的部分不会重传…',true);
+                await uploadPause(attempt);
+                assertActive();
+                merge(validateUpload(await uploadRequest('/uploads/'+job.id,{signal:AbortSignal.timeout(15000)}),job));
+                if(confirmed.has(index))break;
+              }
+            }
+          } catch(error) {failure=error;throw error;}
+          finally {pending.delete(index);inFlight.delete(index);}
+          report();
+        }
+      };
+      await Promise.allSettled(Array.from({length:Math.min(3,info.parallelChunks)},worker));
+      if(failure)throw failure;
+      assertActive();
+      info=validateUpload(await uploadRequest('/uploads/'+job.id,{signal:AbortSignal.timeout(15000)}),job);
+    }
     let failures=0;
     while (info.state==='uploading' && info.receivedBytes<file.size) {
+      assertActive();
       const offset=info.receivedBytes;
       setStatus('正在上传视频 '+Math.floor(offset*100/file.size)+'% · 中断可续传');
       try {
         const next=validateUpload(await apiJSON('/uploads/'+job.id+'/chunks/'+Math.floor(offset/info.chunkBytes),{
           method:'POST',headers:{'Content-Type':'application/octet-stream','X-Request-Id':job.id},
-          body:file.slice(offset,Math.min(offset+info.chunkBytes,file.size)),signal:AbortSignal.timeout(180000)}),job);
+          body:file.slice(offset,Math.min(offset+info.chunkBytes,file.size)),signal:AbortSignal.timeout(180000),
+          onUploadProgress:loaded=>{if(!signal?.aborted){inFlight.set(Math.floor(offset/info.chunkBytes),loaded);report();}}}),job);
         if (next.receivedBytes<=offset) throw new Error('分块尚未确认，正在恢复上传');
         info=next;
+        confirmed.add(Math.floor(offset/info.chunkBytes));inFlight.clear();
         failures=0;
       } catch (error) {
+        assertActive();
         if (!transientUpload(error) || ++failures>5) throw error;
         setStatus('正在恢复上传，已完成的部分不会重传…',true);
         await uploadPause(failures-1);
@@ -145,6 +225,7 @@ async function uploadChunks(job,file) {
       }
     }
     if (info.state==='uploading') {
+      assertActive();
       setStatus('上传完成，正在准备翻译…');
       await uploadRequest('/uploads/'+job.id+'/complete',{method:'POST',headers:options,body:'{}',signal:AbortSignal.timeout(180000)});
     }
@@ -175,18 +256,70 @@ async function continueJob(job) {
   await followJob(job);
 }
 async function apiJSON(path, options = {}) {
-  const headers = {'X-Experience-Id':experienceId,...options.headers};
-  const response = await fetch(experienceAPI + path, {cache:'no-store',...options,headers});
+  const {ignoreRunCancellation=false,onUploadProgress,...requestOptions}=options;
+  const headers = {'X-Experience-Id':experienceId,...requestOptions.headers};
+  const signal=!ignoreRunCancellation&&runController ? AbortSignal.any([runController.signal,...(requestOptions.signal?[requestOptions.signal]:[])]) : requestOptions.signal;
+  if(signal?.aborted)throw stoppedUpload();
+  const response = onUploadProgress && typeof XMLHttpRequest!=='undefined' ? await new Promise((resolve,reject)=>{
+    const request=new XMLHttpRequest();
+    const abort=()=>request.abort();
+    const cleanup=()=>signal?.removeEventListener('abort',abort);
+    request.open(requestOptions.method||'GET',experienceAPI+path);
+    for(const [key,value] of Object.entries(headers))request.setRequestHeader(key,value);
+    request.timeout=180000;
+    request.upload.onprogress=event=>onUploadProgress(event.loaded);
+    request.onload=()=>{cleanup();resolve({ok:request.status>=200&&request.status<300,status:request.status,json:async()=>JSON.parse(request.responseText)});};
+    request.onerror=()=>{cleanup();reject(new TypeError('Failed to fetch'));};
+    request.ontimeout=()=>{cleanup();reject(new Error('上传超时，请继续上传'));};
+    request.onabort=()=>{cleanup();reject(stoppedUpload());};
+    signal?.addEventListener('abort',abort,{once:true});
+    request.send(requestOptions.body);
+  }) : await fetch(experienceAPI + path, {cache:'no-store',...requestOptions,headers,signal});
   let data;
   try { data = await response.json(); } catch (_) { throw new Error('处理服务返回异常，请稍后重试'); }
   if (!response.ok) {
     const message = typeof data?.error === 'string' ? data.error : typeof data?.message === 'string' ? data.message : '';
     const error = new Error(message || '处理服务暂时不可用');
+    error.state=data?.state;
     if (message) { error.status = response.status; error.apiRejected = true; }
     throw error;
   }
   return data;
 }
+
+async function cancelTranslation() {
+  if(cancelling)return;
+  const job=activeJob;
+  cancelling=true;
+  runController?.abort();
+  if(job){job.cancelRequested=true;rememberJob(job);}
+  setRunning(running);
+  setStatus('正在取消操作…');
+  try {
+    if(job) {
+      try {
+        const reply=await apiJSON('/uploads/'+job.id+'/complete',{method:'POST',headers:{'Content-Type':'application/json','X-Request-Id':job.id},body:JSON.stringify({action:'cancel'}),signal:AbortSignal.timeout(20000),ignoreRunCancellation:true});
+        if(reply.id!==job.id || reply.reason!=='cancelled')throw new Error('取消尚未确认');
+      } catch(error) {
+        if(error.status===409 && error.state==='done') {
+          runController=null;activeJob=null;
+          rememberJob({...job,completed:true,completedAt:Date.now(),cancelRequested:false});
+          await showResult(job);
+          return;
+        }
+        if(error.status!==404)throw error;
+      }
+      finishJob(job);
+    }
+    clearResult();restoreOriginalPreview();
+    setStatus('已取消 · 未扣体验额度');
+    try{await apiJSON('/allowance',{ignoreRunCancellation:true,signal:AbortSignal.timeout(15000)}).then(info=>{
+      if(Number.isFinite(info.remainingSeconds)&&info.remainingSeconds>=0&&info.remainingSeconds<=1800){remainingSeconds=info.remainingSeconds;byId('remaining-time').textContent=formatDuration(remainingSeconds);}
+    });}catch(_){}
+  } catch(error) {setStatus('取消尚未确认，点击“重试取消”继续；请勿重复提交',true);}
+  finally {cancelling=false;runController=null;setRunning(false);}
+}
+byId('cancel-translation').addEventListener('click',cancelTranslation);
 async function checkService() {
   try {
     const info = await apiJSON('/health', {signal: AbortSignal.timeout(15000)});
@@ -266,13 +399,16 @@ async function showResult(job) {
   } catch (_) { setStatus('成片已生成 · 字幕列表加载失败，可下载字幕查看', true); }
 }
 async function followJob(job) {
+  const signal=runController?.signal;
   const deadline = Date.now() + 121 * 60 * 1000;
   let failures = 0;
   let missing = 0;
   while (Date.now() < deadline) {
+    if(signal?.aborted || activeJob?.id!==job.id)throw stoppedUpload();
     let state;
     try { state = await apiJSON('/jobs/' + job.id, {signal: AbortSignal.timeout(15000)}); failures = 0; missing = 0; }
     catch (error) {
+      if(signal?.aborted)throw error;
       if (error.status === 404 && error.apiRejected) {
         if (++missing >= 3) {
           finishJob(job);
@@ -283,6 +419,7 @@ async function followJob(job) {
       setStatus('正在重新连接，任务会继续处理…', true);
       await new Promise(resolve => setTimeout(resolve, 3000)); continue;
     }
+    if(signal?.aborted)throw stoppedUpload();
     if (state.state === 'failed') { finishJob(job); throw new Error(state.message || '处理未完成，请重试'); }
     if (state.state === 'done') {
       activeJob=null;
@@ -298,7 +435,7 @@ async function followJob(job) {
   throw new Error('处理时间较长，刷新页面可查看任务状态');
 }
 byId('start-translation').addEventListener('click', async () => {
-  if (running) return;
+  if (running || cancelling || activeJob?.cancelRequested) return;
   const shared = savedJob();
   if (!activeJob && shared && !shared.completed) {
     clearResult();
@@ -307,17 +444,20 @@ byId('start-translation').addEventListener('click', async () => {
   }
   if (activeJob) {
     setRunning(true);
-    try { await continueJob(activeJob); } catch (error) { setStatus(error.message,true); }
-    finally { setRunning(false); }
+    const controller=runController;
+    try { await continueJob(activeJob); } catch (error) { if(!controller.signal.aborted)setStatus(error.message,true); }
+    finally { if(runController===controller&&!cancelling)setRunning(false); }
     return;
   }
   if (!currentFile || currentFile.size > maxUploadBytes) return;
   setRunning(true);
+  const controller=runController;
   clearResult();
   restoreOriginalPreview();
   try {
     setStatus('正在连接处理电脑…');
     if (!await checkService()) throw new Error('处理电脑暂未连接，请稍后重试或下载 App');
+    if(controller.signal.aborted)throw stoppedUpload();
     if (!remainingSeconds) throw new Error('30 分钟体验额度已用完，可下载 App 继续使用');
     if (videoRestriction()) throw new Error(videoRestriction());
     const {job, upload} = await reserveJob();
@@ -342,16 +482,18 @@ byId('start-translation').addEventListener('click', async () => {
     }
     await followJob(job);
   } catch (error) {
-    setStatus(error.message === 'Failed to fetch' ? '无法连接处理服务，请稍后重试' : error.message, true);
-  } finally { setRunning(false); }
+    if(!controller.signal.aborted)setStatus(error.message === 'Failed to fetch' ? '无法连接处理服务，请稍后重试' : error.message, true);
+  } finally { if(runController===controller&&!cancelling)setRunning(false); }
 });
 async function restoreJob() {
   const saved = savedJob();
   if (!saved) return;
   adoptJob(saved);
+  if(saved.cancelRequested){await cancelTranslation();return;}
   setRunning(true); setStatus('正在恢复上次任务…');
-  try { await continueJob(saved); } catch (error) { setStatus(error.message, true); }
-  finally { setRunning(false); }
+  const controller=runController;
+  try { await continueJob(saved); } catch (error) { if(!controller.signal.aborted)setStatus(error.message, true); }
+  finally { if(runController===controller&&!cancelling)setRunning(false); }
 }
 window.addEventListener('storage', event => {
   if (event.key !== jobStorageKey || running || activeJob) return;
