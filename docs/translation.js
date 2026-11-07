@@ -14,7 +14,7 @@ const experienceId = (() => {
   }
   return value;
 })();
-let remainingSeconds = 1200;
+let remainingSeconds = 1800;
 let activeJob = null;
 let ownedJobId = null;
 let uploadNeedsFile = false;
@@ -81,10 +81,13 @@ function clearResult() {
 }
 function setRunning(value) {
   running = value;
-  byId('start-translation').disabled = value || (uploadNeedsFile ? !currentFile || currentFile.size > maxUploadBytes : !activeJob && (!currentFile || currentFile.size > maxUploadBytes || remainingSeconds <= 0));
+  const restriction = !activeJob && !resultUrl ? videoRestriction() : '';
+  byId('video-limit-message').textContent = restriction;
+  byId('video-limit-message').hidden = !restriction;
+  byId('start-translation').disabled = value || (uploadNeedsFile ? !currentFile || currentFile.size > maxUploadBytes : !activeJob && (!currentFile || !!videoRestriction()));
   byId('replace-video').disabled = value || (!!activeJob && !uploadNeedsFile);
   byId('choose-video').disabled = value || (!!activeJob && !uploadNeedsFile);
-  byId('start-label').textContent = value ? '正在处理…' : uploadNeedsFile ? '继续上传' : activeJob ? '继续查看任务' : '一键翻译';
+  byId('start-label').textContent = value ? '正在处理…' : uploadNeedsFile ? '继续上传' : activeJob ? '继续查看任务' : restriction ? '请更换视频或使用 App' : '一键翻译';
 }
 async function fileFingerprint(file) {
   const sample = new Blob([JSON.stringify([file.name,file.size,file.lastModified||0]),file.slice(0,256*1024),file.slice(Math.max(0,file.size-256*1024))]);
@@ -197,7 +200,7 @@ async function checkService() {
 }
 async function refreshAllowance() {
   const info = await apiJSON('/allowance',{signal:AbortSignal.timeout(15000)});
-  if (!Number.isFinite(info.remainingSeconds) || info.remainingSeconds < 0 || info.remainingSeconds > 1200) throw new Error('体验额度读取异常');
+  if (!Number.isFinite(info.remainingSeconds) || info.remainingSeconds < 0 || info.remainingSeconds > 1800) throw new Error('体验额度读取异常');
   remainingSeconds = info.remainingSeconds;
   byId('remaining-time').textContent = Math.floor(remainingSeconds/60)+':'+String(Math.floor(remainingSeconds%60)).padStart(2,'0');
   if (!running) setRunning(false);
@@ -263,7 +266,7 @@ async function showResult(job) {
   } catch (_) { setStatus('成片已生成 · 字幕列表加载失败，可下载字幕查看', true); }
 }
 async function followJob(job) {
-  const deadline = Date.now() + 31 * 60 * 1000;
+  const deadline = Date.now() + 121 * 60 * 1000;
   let failures = 0;
   let missing = 0;
   while (Date.now() < deadline) {
@@ -315,8 +318,8 @@ byId('start-translation').addEventListener('click', async () => {
   try {
     setStatus('正在连接处理电脑…');
     if (!await checkService()) throw new Error('处理电脑暂未连接，请稍后重试或下载 App');
-    if (!remainingSeconds) throw new Error('20 分钟体验额度已用完，可下载 App 继续使用');
-    if (currentDuration && Math.ceil(currentDuration) > remainingSeconds) throw new Error('视频超过剩余体验时长，本次未上传');
+    if (!remainingSeconds) throw new Error('30 分钟体验额度已用完，可下载 App 继续使用');
+    if (videoRestriction()) throw new Error(videoRestriction());
     const {job, upload} = await reserveJob();
     if (!upload) { await continueJob(job); return; }
     setStatus('正在上传视频，上传后自动翻译完整视频…');

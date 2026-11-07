@@ -11,6 +11,27 @@ let running = false;
 let resultUrl = null;
 let currentDuration = 0;
 
+function formatDuration(seconds) {
+  const whole = Math.max(0, Math.floor(seconds));
+  return Math.floor(whole / 60) + ':' + String(whole % 60).padStart(2, '0');
+}
+function videoRestriction() {
+  if (!currentFile) return '';
+  if (currentFile.size > maxUploadBytes) return '视频超过 1 GB，请更换视频或使用 App';
+  if (remainingSeconds <= 0) return '体验额度已用完，可下载 App 继续翻译';
+  if (currentDuration > 0 && Math.ceil(currentDuration) > remainingSeconds) {
+    return '视频 ' + formatDuration(currentDuration) + '，超过剩余体验 ' + formatDuration(remainingSeconds) + '。请更换视频或用 App 翻译完整视频。';
+  }
+  return '';
+}
+function showLocalFileInfo() {
+  if (!currentFile) return;
+  byId('file-name').textContent = currentFile.name;
+  byId('file-name').title = currentFile.name;
+  byId('file-meta').textContent = (currentDuration > 0 ? formatDuration(currentDuration) + ' · ' : '') +
+    (currentFile.size / (1024 * 1024)).toFixed(1) + ' MB · 本地预览';
+}
+
 const setStatus = (text, warning = false) => {
   byId('status-text').textContent = text;
   byId('status-dot').classList.toggle('warning', warning);
@@ -35,9 +56,7 @@ function restoreOriginalPreview() {
   video.pause();
   if (!videoUrl) videoUrl = URL.createObjectURL(currentFile);
   video.src = videoUrl;
-  byId('file-name').textContent = currentFile.name;
-  byId('file-name').title = currentFile.name;
-  byId('file-meta').textContent = (currentFile.size / (1024 * 1024)).toFixed(1) + ' MB · 本地预览';
+  showLocalFileInfo();
   updateWatermark();
 }
 function importVideo(file) {
@@ -56,12 +75,10 @@ function importVideo(file) {
   byId('choose-video').hidden = true;
   byId('video-surface').hidden = false;
   byId('replace-video').hidden = false;
-  byId('file-name').textContent = file.name;
-  byId('file-name').title = file.name;
-  byId('file-meta').textContent = (file.size / (1024 * 1024)).toFixed(1) + ' MB · 本地预览';
-  setStatus('正在读取本地视频…');
-  byId('start-translation').disabled = file.size > maxUploadBytes || remainingSeconds <= 0;
-  if (file.size > maxUploadBytes) setStatus('视频超过 1 GB，请选择较小的视频或下载 App 处理', true);
+  showLocalFileInfo();
+  const restriction = activeJob ? '' : videoRestriction();
+  setStatus(restriction || '正在读取本地视频…', !!restriction);
+  setRunning(false);
   updateWatermark();
 }
 byId('settings-toggle').addEventListener('click', () => {
@@ -104,15 +121,17 @@ video.addEventListener('loadedmetadata', () => {
   if (!currentFile) return;
   const duration = Number.isFinite(video.duration) ? video.duration : 0;
   currentDuration = duration;
-  const minutes = Math.floor(duration / 60);
-  const seconds = String(Math.floor(duration % 60)).padStart(2, '0');
-  const resolution = video.videoWidth + ' × ' + video.videoHeight;
-  byId('file-meta').textContent = minutes + ':' + seconds + ' · ' + resolution;
-  setStatus(currentFile.size > maxUploadBytes ? '视频超过 1 GB，请选择较小的视频或使用 App' : uploadNeedsFile ? '已选择视频 · 点击继续上传' : '视频已就绪 · 点击一键翻译', currentFile.size > maxUploadBytes);
+  showLocalFileInfo();
+  const restriction = activeJob ? '' : videoRestriction();
+  setStatus(restriction || (uploadNeedsFile ? '已选择视频 · 点击继续上传' : '视频已就绪 · 点击一键翻译'), !!restriction);
+  setRunning(false);
 });
 video.addEventListener('error', () => {
   if (resultUrl) setStatus('成片已生成，浏览器无法播放；可下载后打开', true);
-  else if (currentFile && videoUrl && !running) setStatus('浏览器无法预览此编码，可尝试翻译或使用 App', true);
+  else if (currentFile && videoUrl && !running) {
+    setStatus((activeJob ? '' : videoRestriction()) || '浏览器无法预览此编码，可尝试翻译或使用 App', true);
+    setRunning(false);
+  }
 });
 document.querySelectorAll('[data-download]').forEach((button) => {
   button.addEventListener('click', () => {
