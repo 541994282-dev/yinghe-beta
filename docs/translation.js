@@ -90,13 +90,12 @@ function setRunning(value) {
   const restriction = !activeJob && !resultUrl ? videoRestriction() : '';
   byId('video-limit-message').textContent = restriction;
   byId('video-limit-message').hidden = !restriction;
-  byId('start-translation').disabled = value || cancelling || !!activeJob?.cancelRequested || (uploadNeedsFile ? !currentFile || currentFile.size > maxUploadBytes : !activeJob && (!currentFile || !!videoRestriction()));
+  const canCancel = value || !!activeJob?.cancelRequested;
+  byId('start-translation').disabled = cancelling || (!canCancel && (uploadNeedsFile ? !currentFile || currentFile.size > maxUploadBytes : !activeJob && (!currentFile || !!videoRestriction())));
   byId('replace-video').disabled = value || (!!activeJob && !uploadNeedsFile);
   byId('choose-video').disabled = value || (!!activeJob && !uploadNeedsFile);
-  byId('start-label').textContent = value ? '正在处理…' : uploadNeedsFile ? '继续上传' : activeJob ? '继续查看任务' : restriction ? '请更换视频或使用 App' : '一键翻译';
-  byId('cancel-translation').hidden = !value && !activeJob && !cancelling;
-  byId('cancel-translation').disabled = cancelling;
-  byId('cancel-translation').textContent = cancelling ? '正在取消…' : activeJob?.cancelRequested ? '重试取消' : '取消';
+  byId('start-label').textContent = cancelling ? '正在取消…' : activeJob?.cancelRequested ? '重试取消' : value ? '取消翻译' : uploadNeedsFile ? '继续上传' : activeJob ? '继续查看任务' : restriction ? '请更换视频或使用 App' : '一键翻译';
+  byId('start-icon').setAttribute('href', canCancel || cancelling ? '#i-stop' : '#i-play');
 }
 async function fileFingerprint(file) {
   const sample = new Blob([JSON.stringify([file.name,file.size,file.lastModified||0]),file.slice(0,256*1024),file.slice(Math.max(0,file.size-256*1024))]);
@@ -319,7 +318,6 @@ async function cancelTranslation() {
   } catch(error) {setStatus('取消尚未确认，点击“重试取消”继续；请勿重复提交',true);}
   finally {cancelling=false;runController=null;setRunning(false);}
 }
-byId('cancel-translation').addEventListener('click',cancelTranslation);
 async function checkService() {
   try {
     const info = await apiJSON('/health', {signal: AbortSignal.timeout(15000)});
@@ -435,7 +433,8 @@ async function followJob(job) {
   throw new Error('处理时间较长，刷新页面可查看任务状态');
 }
 byId('start-translation').addEventListener('click', async () => {
-  if (running || cancelling || activeJob?.cancelRequested) return;
+  if (cancelling) return;
+  if (running || activeJob?.cancelRequested) { await cancelTranslation(); return; }
   const shared = savedJob();
   if (!activeJob && shared && !shared.completed) {
     clearResult();
