@@ -6,9 +6,9 @@
   <meta name="theme-color" content="#0c111a">
   <meta name="description" content="硬核双语字幕工作台。选择视频，一键翻译并下载双语成片。">
   <title>硬核｜双语字幕工作台</title>
-  <link rel="stylesheet" href="workspace.css?v=336-main-cancel-20261107">
-  <script src="app.js?v=336-main-cancel-20261107" defer></script>
-  <script src="translation.js?v=336-main-cancel-20261107" defer></script>
+  <link rel="stylesheet" href="workspace.css?v=336-cloud-20261112">
+  <script src="app.js?v=336-cloud-20261112" defer></script>
+  <script src="translation.js?v=336-cloud-20261112" defer></script>
 </head>
 <body>
   <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -70,7 +70,7 @@
           <button class="primary-action" id="start-translation" type="button" disabled><svg><use id="start-icon" href="#i-play"/></svg><span id="start-label">一键翻译</span></button>
           <p class="availability" id="service-status">正在检查处理服务</p>
           <p class="availability">剩余体验：<span id="remaining-time">30:00</span> · 同一浏览器累计 · 单个视频最大 1 GB · 中断可续传</p>
-          <p class="availability">点击翻译后，视频经 Cloudflare 转发至处理电脑；素材与结果保留 24 小时。</p>
+          <p class="availability" id="upload-route">点击翻译后，视频经 Cloudflare 转发至处理电脑；素材与结果保留 24 小时。</p>
           <div class="result-actions" id="result-actions" hidden><a id="download-video" download>下载成片</a><a id="download-subtitles" download>下载字幕 SRT</a></div>
           <div class="status-bar" role="status" aria-live="polite"><span class="status-dot" id="status-dot"></span><span id="status-text">等待导入视频</span><span class="status-count" id="status-count">0 条字幕</span></div>
         </section>

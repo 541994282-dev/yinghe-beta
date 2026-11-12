@@ -21,6 +21,7 @@ let uploadNeedsFile = false;
 let processingCaptions = [];
 let runController = null;
 let cancelling = false;
+let uploadTransport = 'local';
 const stoppedUpload = () => Object.assign(new Error('操作已停止'), {name:'AbortError'});
 
 function rememberJob(job) {
@@ -58,10 +59,10 @@ async function reserveJob() {
       return {job:saved, upload:false};
     }
     const id = crypto.randomUUID().replace(/-/g, '');
-    const chunked = currentFile.size > singleUploadBytes;
+    const chunked = uploadTransport === 'oss' || currentFile.size > singleUploadBytes;
     const file = chunked ? {size:currentFile.size,fingerprint:await fileFingerprint(currentFile)} : null;
     if (signal?.aborted) throw stoppedUpload();
-    const job = {id, requestId:id, name:currentFile.name, created:Date.now(),chunked,file};
+    const job = {id, requestId:id, name:currentFile.name, created:Date.now(),chunked,file,transport:uploadTransport};
     adoptJob(job);
     rememberJob(job);
     return {job, upload:true};
@@ -136,6 +137,66 @@ function validateUpload(info,job) {
   }
   return info;
 }
+function cloudURL(raw, path) {
+  const url = new URL(raw);
+  if (url.protocol!=='https:' || url.host!=='yinghe-web-media-hk-541994282.oss-cn-hongkong.aliyuncs.com' ||
+      url.username || url.password || url.pathname!==path || !url.searchParams.has('x-oss-signature')) {
+    throw new Error('云端连接地址异常，请稍后重试');
+  }
+  return raw;
+}
+async function cloudPut(ticket,job,index,sha256,body,onProgress) {
+  const url=cloudURL(ticket?.url,'/jobs/'+job.id+'/input/'+index+'-'+sha256);
+  if (!Number.isFinite(ticket.expiresAt) || ticket.expiresAt*1000<=Date.now()) throw new Error('上传授权已过期，请继续上传');
+  const headers={};
+  for (const [name,value] of Object.entries(ticket.headers||{})) {
+    if (name.toLowerCase()==='content-length') {
+      if (Number(value)!==body.size) throw new Error('分块长度异常');
+      continue; // Browser supplies and signs the Blob's exact length.
+    }
+    if (!['content-type','x-oss-forbid-overwrite'].includes(name.toLowerCase())) throw new Error('上传授权异常');
+    headers[name]=String(value);
+  }
+  const signal=runController ? AbortSignal.any([runController.signal,AbortSignal.timeout(180000)]) : AbortSignal.timeout(180000);
+  if(signal.aborted)throw stoppedUpload();
+  let status;
+  if(typeof XMLHttpRequest!=='undefined') {
+    status=await new Promise((resolve,reject)=>{
+      const request=new XMLHttpRequest();
+      const abort=()=>request.abort();
+      const clean=()=>signal.removeEventListener('abort',abort);
+      request.open('PUT',url);
+      for(const [name,value] of Object.entries(headers))request.setRequestHeader(name,value);
+      request.timeout=180000;
+      request.upload.onprogress=event=>onProgress(event.loaded);
+      request.onload=()=>{clean();resolve(request.status);};
+      request.onerror=()=>{clean();reject(new Error('云端上传连接中断，请继续上传'));};
+      request.ontimeout=()=>{clean();reject(new Error('云端上传超时，请继续上传'));};
+      request.onabort=()=>{clean();reject(stoppedUpload());};
+      signal.addEventListener('abort',abort,{once:true});
+      request.send(body);
+    });
+  } else status=(await fetch(url,{method:'PUT',headers,body,signal,credentials:'omit',referrerPolicy:'no-referrer'})).status;
+  // A lost successful response may be retried. Immutable objects return 409;
+  // the backend still verifies their size and later their complete SHA256.
+  if(status!==200 && status!==409)throw new Error('云端上传未确认，请继续上传');
+}
+async function sendPart(job,info,index,file,onProgress) {
+  const body=file.slice(index*info.chunkBytes,Math.min((index+1)*info.chunkBytes,file.size));
+  if(info.transport!=='oss')return apiJSON('/uploads/'+job.id+'/chunks/'+index,{
+    method:'POST',headers:{'Content-Type':'application/octet-stream','X-Request-Id':job.id},
+    body,signal:AbortSignal.timeout(180000),onUploadProgress:onProgress});
+  const hash=await crypto.subtle.digest('SHA-256',await body.arrayBuffer());
+  const sha256=Array.from(new Uint8Array(hash),v=>v.toString(16).padStart(2,'0')).join('');
+  if(runController?.signal.aborted)throw stoppedUpload();
+  const options={method:'POST',headers:{'Content-Type':'application/json','X-Request-Id':job.id},signal:AbortSignal.timeout(20000)};
+  const path='/uploads/'+job.id+'/chunks/'+index;
+  const granted=validateUpload(await apiJSON(path,{...options,body:JSON.stringify({action:'authorize',sha256})}),job);
+  if(granted.receivedChunks?.includes(index))return granted;
+  await cloudPut(granted.ticket,job,index,sha256,body,onProgress);
+  if(runController?.signal.aborted)throw stoppedUpload();
+  return apiJSON(path,{...options,signal:AbortSignal.timeout(20000),body:JSON.stringify({action:'commit',sha256})});
+}
 async function uploadChunks(job,file) {
   const signal=runController?.signal;
   const assertActive=()=>{if(signal?.aborted || activeJob?.id!==job.id)throw stoppedUpload();};
@@ -144,7 +205,7 @@ async function uploadChunks(job,file) {
   const transfer=async()=>{
     const options={'Content-Type':'application/json','X-Request-Id':job.id};
     let info=validateUpload(await uploadRequest('/uploads',{method:'POST',headers:options,
-      body:JSON.stringify({size:file.size,name:file.name,fingerprint:job.file.fingerprint}),signal:AbortSignal.timeout(180000)}),job);
+      body:JSON.stringify({size:file.size,name:file.name,fingerprint:job.file.fingerprint,transport:job.transport}),signal:AbortSignal.timeout(180000)}),job);
     const began=Date.now(), initial=info.uploadedBytes??info.receivedBytes;
     const confirmed=new Set(info.receivedChunks||Array.from({length:Math.ceil(info.receivedBytes/info.chunkBytes)},(_,i)=>i));
     const inFlight=new Map(), count=Math.ceil(file.size/info.chunkBytes);
@@ -172,11 +233,8 @@ async function uploadChunks(job,file) {
               assertActive();
               inFlight.set(index,0);report();
               try {
-                const next=validateUpload(await apiJSON('/uploads/'+job.id+'/chunks/'+index,{
-                  method:'POST',headers:{'Content-Type':'application/octet-stream','X-Request-Id':job.id},
-                  body:file.slice(index*info.chunkBytes,index*info.chunkBytes+partSize(index)),signal:AbortSignal.timeout(180000),
-                  onUploadProgress:loaded=>{if(!signal?.aborted){inFlight.set(index,Math.min(partSize(index),loaded));report();}}
-                }),job);
+                const next=validateUpload(await sendPart(job,info,index,file,
+                  loaded=>{if(!signal?.aborted){inFlight.set(index,Math.min(partSize(index),loaded));report();}}),job);
                 merge(next);
                 if(!confirmed.has(index))throw new Error('分块尚未确认');
                 break;
@@ -207,10 +265,8 @@ async function uploadChunks(job,file) {
       const offset=info.receivedBytes;
       setStatus('正在上传视频 '+Math.floor(offset*100/file.size)+'% · 中断可续传');
       try {
-        const next=validateUpload(await apiJSON('/uploads/'+job.id+'/chunks/'+Math.floor(offset/info.chunkBytes),{
-          method:'POST',headers:{'Content-Type':'application/octet-stream','X-Request-Id':job.id},
-          body:file.slice(offset,Math.min(offset+info.chunkBytes,file.size)),signal:AbortSignal.timeout(180000),
-          onUploadProgress:loaded=>{if(!signal?.aborted){inFlight.set(Math.floor(offset/info.chunkBytes),loaded);report();}}}),job);
+        const next=validateUpload(await sendPart(job,info,Math.floor(offset/info.chunkBytes),file,
+          loaded=>{if(!signal?.aborted){inFlight.set(Math.floor(offset/info.chunkBytes),loaded);report();}}),job);
         if (next.receivedBytes<=offset) throw new Error('分块尚未确认，正在恢复上传');
         info=next;
         confirmed.add(Math.floor(offset/info.chunkBytes));inFlight.clear();
@@ -321,6 +377,10 @@ async function cancelTranslation() {
 async function checkService() {
   try {
     const info = await apiJSON('/health', {signal: AbortSignal.timeout(15000)});
+    uploadTransport=info.uploadTransport==='oss' ? 'oss' : 'local';
+    byId('upload-route').textContent=uploadTransport==='oss' ?
+      '视频暂存于阿里云香港，由处理电脑翻译；文件有效期 24 小时。' :
+      '点击翻译后，视频经 Cloudflare 转发至处理电脑；素材与结果保留 24 小时。';
     byId('service-status').textContent = info.ready ? '处理服务已连接 · 保留原声' : '处理电脑暂未连接 · 可下载 App 使用';
     if (info.ready) await refreshAllowance();
     return info.ready === true;
@@ -375,8 +435,13 @@ video.addEventListener('timeupdate', () => {
     row.classList.toggle('current', video.currentTime >= caption.start && video.currentTime < caption.end);
   });
 });
-async function showResult(job) {
-  resultUrl = experienceAPI + '/jobs/' + job.id + '/result.mp4';
+async function showResult(job,state) {
+  if(!state && job.transport==='oss')state=await apiJSON('/jobs/'+job.id,{signal:AbortSignal.timeout(15000)});
+  const links=state?.transport==='oss' ? state.resultLinks : null;
+  if(job.transport==='oss' && !links)throw new Error('成片下载链接暂未就绪，请继续查看任务');
+  const resultPath='/jobs/'+job.id+'/output/';
+  const subtitleUrl=links ? cloudURL(links['result.srt'],resultPath+'result.srt') : experienceAPI+'/jobs/'+job.id+'/result.srt';
+  resultUrl = links ? cloudURL(links['result.mp4'],resultPath+'result.mp4') : experienceAPI + '/jobs/' + job.id + '/result.mp4';
   video.pause();
   video.src = resultUrl;
   byId('choose-video').hidden = true;
@@ -385,9 +450,8 @@ async function showResult(job) {
   byId('preview-watermark').hidden = true;
   byId('file-name').textContent = job.name || '双语成片';
   byId('file-meta').textContent = '双语成片';
-  byId('download-video').href = resultUrl + '?download=1';
-  const subtitleUrl = experienceAPI + '/jobs/' + job.id + '/result.srt';
-  byId('download-subtitles').href = subtitleUrl + '?download=1';
+  byId('download-video').href = links ? cloudURL(links['result.mp4:download'],resultPath+'result.mp4') : resultUrl + '?download=1';
+  byId('download-subtitles').href = links ? cloudURL(links['result.srt:download'],resultPath+'result.srt') : subtitleUrl + '?download=1';
   byId('result-actions').hidden = false;
   setStatus('翻译完成 · 可播放或下载成片');
   try {
@@ -422,7 +486,7 @@ async function followJob(job) {
     if (state.state === 'done') {
       activeJob=null;
       if (savedJob()?.id === job.id) rememberJob({...job, completed:true, completedAt:Date.now()});
-      await showResult(job);
+      await showResult(job,state);
       try { await refreshAllowance(); } catch (_) { setStatus('成片已生成，可下载；额度暂时无法刷新',true); }
       return;
     }
